@@ -1,18 +1,371 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#1a5fa8" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Prendas SER" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-  <title>Prendas — Colégio SER</title>
-  <link rel="stylesheet" href="/src/style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#1a5fa8"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Prendas SER"/>
+<title>Prendas — Festa Junina · Colégio SER</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a5fa8;--blue-dark:#134a85;--blue-light:#e8f1fb;
+  --green:#2d8a4e;--green-light:#e8f5e9;
+  --red:#c0392b;--red-light:#fce4ec;
+  --gray-50:#f8f9fa;--gray-100:#f1f3f5;--gray-200:#e9ecef;
+  --gray-300:#dee2e6;--gray-400:#ced4da;--gray-600:#6c757d;--gray-800:#343a40;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f3f5;color:#343a40;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+#app{height:100%}
+.shell{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:#fff;overflow:hidden}
+.header{background:var(--blue);color:#fff;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;flex-shrink:0}
+.header-icon{font-size:26px;line-height:1}
+.header-title{font-size:16px;font-weight:600}
+.header-sub{font-size:11px;opacity:.75;margin-top:1px}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 0}
+.nav{display:flex;background:#fff;border-top:1px solid var(--gray-200);padding-bottom:env(safe-area-inset-bottom);flex-shrink:0}
+.nb{flex:1;border:none;background:transparent;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--gray-600);font-size:10px;font-weight:500;cursor:pointer;border-top:2px solid transparent;-webkit-tap-highlight-color:transparent}
+.nb svg{width:22px;height:22px;stroke-width:1.8}
+.nb.active{color:var(--blue);border-top-color:var(--blue)}
+.section{display:none;padding-bottom:20px}
+.section.active{display:block}
+.page-title{font-size:15px;font-weight:600;color:var(--gray-800);margin-bottom:12px}
+.page-sub{font-size:13px;color:var(--gray-600);margin-top:-8px;margin-bottom:12px}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r-md);padding:14px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:10px}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.stat-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:12px;text-align:center}
+.stat-val{font-size:26px;font-weight:700;color:var(--gray-800);line-height:1.1}
+.stat-lbl{font-size:11px;color:var(--gray-600);margin-top:3px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:4px}
+.fg input,.fg select{width:100%;padding:10px 12px;font-size:15px;border:1px solid var(--gray-300);border-radius:var(--r-sm);background:#fff;color:var(--gray-800);appearance:none;-webkit-appearance:none;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,168,.12)}
+.btn{border:none;cursor:pointer;border-radius:var(--r-sm);font-size:14px;font-weight:600;padding:11px 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-block{width:100%}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--gray-300);color:var(--gray-800)}
+.btn-sm{padding:7px 11px;font-size:13px}
+.divider{height:1px;background:var(--gray-200);margin:12px 0}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.bp{background:#e8f5e9;color:#1b5e20}
+.bm{background:#fff8e1;color:#6d4c00}
+.bg{background:#fce4ec;color:#7b1a2e}
+.bs{background:#fce4ec;color:#7b1a2e}
+.br{background:#e8f5e9;color:#1b5e20}
+.qty-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--gray-100)}
+.qty-row:last-child{border-bottom:none}
+.qty-label{display:flex;align-items:center;gap:8px;font-size:14px}
+.qty-input{width:80px;text-align:center;font-size:16px;font-weight:700;padding:6px 8px;border:1px solid var(--gray-300);border-radius:var(--r-sm);background:#fff;color:var(--gray-800);outline:none}
+.qty-input:focus{border-color:var(--blue)}
+.qty-ctrl{display:flex;align-items:center;gap:10px}
+.qty-btn{width:32px;height:32px;border:1px solid var(--gray-300);background:var(--gray-50);border-radius:var(--r-sm);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.qty-btn:active{background:var(--gray-200)}
+.qty-val{font-size:16px;font-weight:700;min-width:32px;text-align:center}
+.li{padding:11px 0;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.li:last-child{border-bottom:none}
+.li-main{flex:1;min-width:0}
+.li-name{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li-sub{font-size:12px;color:var(--gray-600);margin-top:2px}
+.mitem{padding:10px 0;border-bottom:1px solid var(--gray-100)}
+.mitem:last-child{border-bottom:none}
+.mtop{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.mname{font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mdetail{font-size:12px;color:var(--gray-600);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.empty{text-align:center;padding:32px 16px;color:var(--gray-600);font-size:13px}
+.empty-icon{font-size:36px;margin-bottom:8px;opacity:.4}
+.toast{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom) + 12px);left:50%;transform:translateX(-50%) translateY(8px);background:#343a40;color:#fff;border-radius:var(--r-sm);padding:9px 20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px;color:var(--gray-600);font-size:14px}
+.spinner{width:18px;height:18px;border:2px solid var(--gray-300);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hbox{background:var(--blue-light);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;color:var(--blue);margin-bottom:10px}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.js"></script>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://fapjlmixvmxifumeavdg.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhcGpsbWl4dm14aWZ1bWVhdmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODU2MjcsImV4cCI6MjA5Njc2MTYyN30.yAa5TdghjlMPUa1knzeOXX4DVoC7jN92_DlDjlWsQcM'
+
+const db = supabase.createClient(SUPA_URL, SUPA_KEY)
+
+let barracas=[], movimentos=[], estoqueInicial={p:0,m:0,g:0}, saldo={p:0,m:0,g:0}
+let estoqueEdit={p:0,m:0,g:0}, saidaTemp={p:0,m:0,g:0}, retornoTemp={p:0,m:0,g:0}
+let tab='inicio'
+
+const ICONS={
+  inicio:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18v-9"/></svg>`,
+  barracas:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  estoque:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  saida:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  retorno:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+  relatorio:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
+}
+
+async function boot(){
+  document.getElementById('app').innerHTML=`
+    <div class="shell">
+      <header class="header">
+        <span class="header-icon">🎪</span>
+        <div><div class="header-title">Prendas — Festa Junina</div><div class="header-sub">Colégio SER · Controle de distribuição</div></div>
+      </header>
+      <main class="content" id="content"><div class="loading"><div class="spinner"></div> Carregando…</div></main>
+      <nav class="nav" id="nav">
+        ${['inicio','barracas','estoque','saida','retorno','relatorio'].map(t=>`
+          <button class="nb${t===tab?' active':''}" data-tab="${t}">${ICONS[t]}<span>${{inicio:'Início',barracas:'Barracas',estoque:'Estoque',saida:'Saída',retorno:'Retorno',relatorio:'Relatório'}[t]}</span></button>
+        `).join('')}
+      </nav>
+    </div>`
+  document.getElementById('nav').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-tab]')
+    if(btn) switchTab(btn.dataset.tab)
+  })
+  await loadAll()
+  renderTab(tab)
+  subscribe()
+}
+
+async function loadAll(){
+  const [b,m,e]=await Promise.all([
+    db.from('barracas').select('*').order('created_at'),
+    db.from('movimentos').select('*').order('created_at'),
+    db.from('estoque').select('*').limit(1).maybeSingle()
+  ])
+  if(b.error){toast('Erro de conexão: '+b.error.message);return}
+  barracas=b.data||[]; movimentos=m.data||[]
+  if(e.data){estoqueInicial={p:e.data.p,m:e.data.m,g:e.data.g};estoqueEdit={...estoqueInicial};recalc()}
+}
+
+function recalc(){
+  saldo={...estoqueInicial}
+  movimentos.forEach(mv=>{const s=mv.tipo==='saida'?-1:1;saldo.p+=s*mv.qtd_p;saldo.m+=s*mv.qtd_m;saldo.g+=s*mv.qtd_g})
+}
+
+function subscribe(){
+  db.channel('all').on('postgres_changes',{event:'*',schema:'public',table:'barracas'},async()=>{const r=await db.from('barracas').select('*').order('created_at');barracas=r.data||[];renderTab(tab)})
+  .on('postgres_changes',{event:'*',schema:'public',table:'movimentos'},async()=>{const r=await db.from('movimentos').select('*').order('created_at');movimentos=r.data||[];recalc();renderTab(tab)})
+  .on('postgres_changes',{event:'*',schema:'public',table:'estoque'},async()=>{const r=await db.from('estoque').select('*').limit(1).maybeSingle();if(r.data){estoqueInicial={p:r.data.p,m:r.data.m,g:r.data.g};estoqueEdit={...estoqueInicial};recalc()}renderTab(tab)})
+  .subscribe()
+}
+
+function switchTab(t){
+  tab=t
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b.dataset.tab===t))
+  renderTab(t)
+}
+
+function renderTab(t){
+  const fn={inicio:rInicio,barracas:rBarracas,estoque:rEstoque,saida:rSaida,retorno:rRetorno,relatorio:rRelatorio}[t]
+  if(!fn)return
+  document.getElementById('content').innerHTML=`<div class="section active">${fn()}</div>`
+  attachHandlers(t)
+}
+
+function qtyInput(pfx,tam,sigla,nome,val){
+  return`<div class="qty-row"><div class="qty-label"><span class="badge b${tam}">${sigla}</span>${nome}</div><input class="qty-input" type="number" min="0" inputmode="numeric" pattern="[0-9]*" data-pfx="${pfx}" data-tam="${tam}" value="${val}"/></div>`
+}
+function qtyBtns(pfx,tam,sigla,nome,val){
+  return`<div class="qty-row"><div class="qty-label"><span class="badge b${tam}">${sigla}</span>${nome}</div><div class="qty-ctrl"><button class="qty-btn" data-pfx="${pfx}" data-tam="${tam}" data-d="-1">−</button><span class="qty-val" id="qv-${pfx}-${tam}">${val}</span><button class="qty-btn" data-pfx="${pfx}" data-tam="${tam}" data-d="1">+</button></div></div>`
+}
+
+function rInicio(){
+  const saidas=movimentos.filter(m=>m.tipo==='saida')
+  const dp=saidas.reduce((a,m)=>a+m.qtd_p,0),dm=saidas.reduce((a,m)=>a+m.qtd_m,0),dg=saidas.reduce((a,m)=>a+m.qtd_g,0)
+  const rec=[...movimentos].reverse().slice(0,5)
+  return`<p class="page-title">Visão geral</p>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">${estoqueInicial.p}</div><div class="stat-lbl">Estoque inicial P</div></div>
+    <div class="stat-card"><div class="stat-val">${estoqueInicial.m}</div><div class="stat-lbl">Estoque inicial M</div></div>
+    <div class="stat-card"><div class="stat-val">${estoqueInicial.g}</div><div class="stat-lbl">Estoque inicial G</div></div>
+    <div class="stat-card"><div class="stat-val">${barracas.length}</div><div class="stat-lbl">Barracas</div></div>
+  </div>
+  <div class="card"><div class="card-title">Distribuído</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge bp">P: ${dp}</span><span class="badge bm">M: ${dm}</span><span class="badge bg">G: ${dg}</span></div></div>
+  <div class="card"><div class="card-title">Saldo disponível</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge bp">P: ${saldo.p}</span><span class="badge bm">M: ${saldo.m}</span><span class="badge bg">G: ${saldo.g}</span></div></div>
+  <div class="card"><div class="card-title">Movimentações recentes</div>${rec.length?rec.map(mvHTML).join(''):empty('Nenhuma movimentação ainda')}</div>`
+}
+
+function rBarracas(){
+  return`<p class="page-title">Barracas</p>
+  <div class="card">
+    <div class="fg"><label>Nome da barraca</label><input id="ib-nome" type="text" placeholder="Ex: Argolas, Pesca, Correio Elegante…"/></div>
+    <div class="fg"><label>Responsável</label><input id="ib-resp" type="text" placeholder="Nome de quem retira as prendas"/></div>
+    <button class="btn btn-primary btn-block" id="btn-add-b">＋ Cadastrar barraca</button>
+  </div>
+  <div id="lista-b">${barracas.length?barracas.map(b=>`
+    <div class="card" style="margin-bottom:8px">
+      <div class="li" style="padding:0">
+        <div class="li-main"><div class="li-name">${b.nome}</div>${b.responsavel?`<div class="li-sub">👤 ${b.responsavel}</div>`:''}</div>
+        <button class="btn btn-outline btn-sm" data-del="${b.id}">🗑</button>
+      </div>
+    </div>`).join(''):empty('Nenhuma barraca cadastrada')}</div>`
+}
+
+function rEstoque(){
+  return`<p class="page-title">Estoque de prendas</p>
+  <p class="page-sub">Informe o total de prendas disponíveis.</p>
+  <div class="card">
+    ${qtyInput('est','p','P','Pequena',estoqueEdit.p)}
+    ${qtyInput('est','m','M','Média',estoqueEdit.m)}
+    ${qtyInput('est','g','G','Grande',estoqueEdit.g)}
+    <div class="divider"></div>
+    <button class="btn btn-primary btn-block" id="btn-salvar-est">💾 Salvar estoque inicial</button>
+  </div>
+  ${(estoqueInicial.p||estoqueInicial.m||estoqueInicial.g)?`<div class="card"><div class="card-title">Saldo atual</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge bp">P: ${saldo.p}</span><span class="badge bm">M: ${saldo.m}</span><span class="badge bg">G: ${saldo.g}</span></div></div>`:''}`
+}
+
+function rSaida(){
+  return`<p class="page-title">Dar saída de prendas</p>
+  <div class="card">
+    <div class="fg"><label>Barraca de destino</label><select id="sel-s"><option value="">Selecione a barraca…</option>${barracas.map(b=>`<option value="${b.id}">${b.nome}${b.responsavel?' — '+b.responsavel:''}</option>`).join('')}</select></div>
+    <div class="fg"><label>Retirado por</label><input id="inp-por" type="text" placeholder="Nome de quem está retirando"/></div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:6px">Quantidade</div>
+    ${qtyInput('saida','p','P','Pequena',saidaTemp.p)}
+    ${qtyInput('saida','m','M','Média',saidaTemp.m)}
+    ${qtyInput('saida','g','G','Grande',saidaTemp.g)}
+    <div class="divider"></div>
+    <div class="hbox">Saldo: <strong>P ${saldo.p}</strong> · <strong>M ${saldo.m}</strong> · <strong>G ${saldo.g}</strong></div>
+    <button class="btn btn-danger btn-block" id="btn-saida">→ Confirmar saída</button>
+  </div>`
+}
+
+function rRetorno(){
+  return`<p class="page-title">Retorno de prendas</p>
+  <p class="page-sub">Registre as prendas que sobraram nas barracas.</p>
+  <div class="card">
+    <div class="fg"><label>Barraca de origem</label><select id="sel-r"><option value="">Selecione a barraca…</option>${barracas.map(b=>`<option value="${b.id}">${b.nome}${b.responsavel?' — '+b.responsavel:''}</option>`).join('')}</select></div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:6px">Quantidade devolvida</div>
+    ${qtyInput('ret','p','P','Pequena',retornoTemp.p)}
+    ${qtyInput('ret','m','M','Média',retornoTemp.m)}
+    ${qtyInput('ret','g','G','Grande',retornoTemp.g)}
+    <div class="divider"></div>
+    <button class="btn btn-success btn-block" id="btn-retorno">← Confirmar retorno</button>
+  </div>`
+}
+
+function rRelatorio(){
+  if(!movimentos.length&&!estoqueInicial.p&&!estoqueInicial.m&&!estoqueInicial.g)
+    return`<p class="page-title">Relatório geral</p>${empty('Nenhum dado registrado ainda')}`
+  const saidas=movimentos.filter(m=>m.tipo==='saida'),rets=movimentos.filter(m=>m.tipo==='retorno')
+  const usP=saidas.reduce((a,m)=>a+m.qtd_p,0)-rets.reduce((a,m)=>a+m.qtd_p,0)
+  const usM=saidas.reduce((a,m)=>a+m.qtd_m,0)-rets.reduce((a,m)=>a+m.qtd_m,0)
+  const usG=saidas.reduce((a,m)=>a+m.qtd_g,0)-rets.reduce((a,m)=>a+m.qtd_g,0)
+  const pb={}
+  movimentos.forEach(mv=>{const bar=barracas.find(b=>b.id===mv.barraca_id);const n=bar?bar.nome:'?';if(!pb[n])pb[n]={sp:0,sm:0,sg:0,vp:0,vm:0,vg:0};if(mv.tipo==='saida'){pb[n].sp+=mv.qtd_p;pb[n].sm+=mv.qtd_m;pb[n].sg+=mv.qtd_g}else{pb[n].vp+=mv.qtd_p;pb[n].vm+=mv.qtd_m;pb[n].vg+=mv.qtd_g}})
+  return`<p class="page-title">Relatório geral</p>
+  <div class="stats-grid"><div class="stat-card"><div class="stat-val" style="color:#1b5e20">${usP}</div><div class="stat-lbl">P utilizadas</div></div><div class="stat-card"><div class="stat-val" style="color:#6d4c00">${usM}</div><div class="stat-lbl">M utilizadas</div></div></div>
+  <div class="stats-grid" style="margin-top:0"><div class="stat-card"><div class="stat-val" style="color:#7b1a2e">${usG}</div><div class="stat-lbl">G utilizadas</div></div><div class="stat-card"><div class="stat-val">${saldo.p+saldo.m+saldo.g}</div><div class="stat-lbl">Saldo restante</div></div></div>
+  <div class="card"><div class="card-title">Por barraca</div>${Object.entries(pb).map(([n,v])=>`<div class="li"><div class="li-main"><div class="li-name">${n}</div><div class="li-sub">Saiu: <span class="badge bp">${v.sp}P</span> <span class="badge bm">${v.sm}M</span> <span class="badge bg">${v.sg}G</span></div></div><div style="text-align:right;font-size:12px;color:var(--gray-600)">Usou: ${v.sp-v.vp}P ${v.sm-v.vm}M ${v.sg-v.vg}G</div></div>`).join('')}</div>
+  <div class="card"><div class="card-title">Histórico (${movimentos.length})</div>${[...movimentos].reverse().map(mvHTML).join('')}</div>`
+}
+
+function mvHTML(mv){
+  const bar=barracas.find(b=>b.id===mv.barraca_id),n=bar?bar.nome:'?'
+  const pts=[mv.qtd_p&&mv.qtd_p+'P',mv.qtd_m&&mv.qtd_m+'M',mv.qtd_g&&mv.qtd_g+'G'].filter(Boolean).join(' · ')
+  const h=mv.created_at?new Date(mv.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
+  return`<div class="mitem"><div class="mtop"><span class="mname">${n}</span><span class="badge ${mv.tipo==='saida'?'bs':'br'}">${mv.tipo==='saida'?'↑ Saída':'↓ Retorno'}</span></div><div class="mdetail"><span>${pts}</span>${mv.retirado_por?`<span>— ${mv.retirado_por}</span>`:''}<span>· ${h}</span></div></div>`
+}
+
+function empty(msg){return`<div class="empty"><div class="empty-icon">📦</div>${msg}</div>`}
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500)}
+
+function attachHandlers(t){
+  // qty inputs
+  document.querySelectorAll('.qty-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const v=Math.max(0,parseInt(inp.value)||0);inp.value=v
+      const {pfx,tam}=inp.dataset
+      if(pfx==='est')estoqueEdit[tam]=v
+      else if(pfx==='saida')saidaTemp[tam]=v
+      else if(pfx==='ret')retornoTemp[tam]=v
+    })
+  })
+  // qty btns (not used now but keeping for future)
+  document.querySelectorAll('.qty-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const{pfx,tam,d}=btn.dataset,delta=Number(d)
+      let obj=pfx==='est'?estoqueEdit:pfx==='saida'?saidaTemp:retornoTemp
+      obj[tam]=Math.max(0,obj[tam]+delta)
+      const el=document.getElementById(`qv-${pfx}-${tam}`)
+      if(el)el.textContent=obj[tam]
+    })
+  })
+  if(t==='barracas'){
+    document.getElementById('btn-add-b').addEventListener('click',addBarraca)
+    document.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',()=>delBarraca(btn.dataset.del)))
+  }
+  if(t==='estoque')document.getElementById('btn-salvar-est').addEventListener('click',salvarEstoque)
+  if(t==='saida')document.getElementById('btn-saida').addEventListener('click',confirmarSaida)
+  if(t==='retorno')document.getElementById('btn-retorno').addEventListener('click',confirmarRetorno)
+}
+
+async function addBarraca(){
+  const nome=document.getElementById('ib-nome').value.trim()
+  const responsavel=document.getElementById('ib-resp').value.trim()
+  if(!nome){toast('Informe o nome da barraca');return}
+  const btn=document.getElementById('btn-add-b');btn.disabled=true;btn.textContent='Salvando…'
+  const{error}=await db.from('barracas').insert({nome,responsavel})
+  btn.disabled=false;btn.textContent='＋ Cadastrar barraca'
+  if(error){toast('Erro: '+error.message);return}
+  document.getElementById('ib-nome').value='';document.getElementById('ib-resp').value=''
+  toast('Barraca cadastrada!')
+}
+
+async function delBarraca(id){
+  const{error}=await db.from('barracas').delete().eq('id',id)
+  if(error)toast('Erro ao remover');else toast('Barraca removida')
+}
+
+async function salvarEstoque(){
+  const btn=document.getElementById('btn-salvar-est');btn.disabled=true;btn.textContent='Salvando…'
+  const{data:ex}=await db.from('estoque').select('id').limit(1).maybeSingle()
+  const payload={p:estoqueEdit.p,m:estoqueEdit.m,g:estoqueEdit.g}
+  const{error}=ex?await db.from('estoque').update(payload).eq('id',ex.id):await db.from('estoque').insert(payload)
+  btn.disabled=false;btn.textContent='💾 Salvar estoque inicial'
+  if(error){toast('Erro: '+error.message);return}
+  estoqueInicial={...estoqueEdit};recalc();toast('Estoque salvo!');renderTab('estoque')
+}
+
+async function confirmarSaida(){
+  const bid=document.getElementById('sel-s').value
+  const por=document.getElementById('inp-por').value.trim()
+  if(!bid){toast('Selecione a barraca');return}
+  const{p,m,g}=saidaTemp
+  if(!p&&!m&&!g){toast('Informe ao menos 1 prenda');return}
+  if(p>saldo.p||m>saldo.m||g>saldo.g){toast('Quantidade maior que o saldo!');return}
+  const btn=document.getElementById('btn-saida');btn.disabled=true;btn.textContent='Registrando…'
+  const{error}=await db.from('movimentos').insert({barraca_id:bid,tipo:'saida',qtd_p:p,qtd_m:m,qtd_g:g,retirado_por:por||null})
+  btn.disabled=false;btn.textContent='→ Confirmar saída'
+  if(error){toast('Erro: '+error.message);return}
+  saidaTemp={p:0,m:0,g:0};toast('Saída registrada!')
+}
+
+async function confirmarRetorno(){
+  const bid=document.getElementById('sel-r').value
+  if(!bid){toast('Selecione a barraca');return}
+  const{p,m,g}=retornoTemp
+  if(!p&&!m&&!g){toast('Informe ao menos 1 prenda');return}
+  const btn=document.getElementById('btn-retorno');btn.disabled=true;btn.textContent='Registrando…'
+  const{error}=await db.from('movimentos').insert({barraca_id:bid,tipo:'retorno',qtd_p:p,qtd_m:m,qtd_g:g,retirado_por:null})
+  btn.disabled=false;btn.textContent='← Confirmar retorno'
+  if(error){toast('Erro: '+error.message);return}
+  retornoTemp={p:0,m:0,g:0};toast('Retorno registrado!')
+}
+
+boot()
+</script>
 </body>
 </html>
