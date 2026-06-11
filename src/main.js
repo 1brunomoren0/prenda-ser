@@ -331,29 +331,19 @@ function renderRelatorio() {
 
 // ── Helpers ───────────────────────────────────────────────────────
 function qtyRow(prefix, tam, sigla, nome, val) {
-  if (prefix === 'est') {
-    return `<div class="qty-row">
-      <div class="qty-label"><span class="badge badge-${tam}">${sigla}</span> ${nome}</div>
-      <input
-        type="number"
-        min="0"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        id="qty-${prefix}-${tam}"
-        data-qty-input="${prefix}"
-        data-tam="${tam}"
-        value="${val}"
-        style="width:80px;text-align:center;font-size:16px;font-weight:700;padding:6px 8px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);background:#fff;color:var(--gray-800)"
-      />
-    </div>`
-  }
   return `<div class="qty-row">
     <div class="qty-label"><span class="badge badge-${tam}">${sigla}</span> ${nome}</div>
-    <div class="qty-ctrl">
-      <button class="qty-btn" data-qty="${prefix}" data-tam="${tam}" data-delta="-1">−</button>
-      <span class="qty-val" id="qty-${prefix}-${tam}">${val}</span>
-      <button class="qty-btn" data-qty="${prefix}" data-tam="${tam}" data-delta="1">+</button>
-    </div>
+    <input
+      type="number"
+      min="0"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      id="qty-${prefix}-${tam}"
+      data-qty-input="${prefix}"
+      data-tam="${tam}"
+      value="${val}"
+      style="width:80px;text-align:center;font-size:16px;font-weight:700;padding:6px 8px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);background:#fff;color:var(--gray-800)"
+    />
   </div>`
 }
 
@@ -391,26 +381,15 @@ function toast(msg) {
 
 // ── Event Handlers ────────────────────────────────────────────────
 function attachHandlers(tab) {
-  // Estoque: input digitável
-  document.querySelectorAll('[data-qty-input="est"]').forEach(input => {
+  // Todos os inputs de quantidade
+  document.querySelectorAll('[data-qty-input]').forEach(input => {
     input.addEventListener('input', () => {
       const val = Math.max(0, parseInt(input.value) || 0)
       input.value = val
-      estoqueEdit[input.dataset.tam] = val
-    })
-  })
-
-  // Qty buttons (saida/retorno)
-  document.querySelectorAll('[data-qty]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const { qty, tam, delta } = btn.dataset
-      if (qty === 'saida') {
-        saidaTemp[tam] = Math.max(0, saidaTemp[tam] + Number(delta))
-        document.getElementById(`qty-saida-${tam}`).textContent = saidaTemp[tam]
-      } else if (qty === 'ret') {
-        retornoTemp[tam] = Math.max(0, retornoTemp[tam] + Number(delta))
-        document.getElementById(`qty-ret-${tam}`).textContent = retornoTemp[tam]
-      }
+      const { qtyInput: prefix, tam } = input.dataset
+      if (prefix === 'est') estoqueEdit[tam] = val
+      else if (prefix === 'saida') saidaTemp[tam] = val
+      else if (prefix === 'ret') retornoTemp[tam] = val
     })
   })
 
