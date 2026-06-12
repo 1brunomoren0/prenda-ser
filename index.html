@@ -80,6 +80,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 .mtop{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .mname{font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mdetail{font-size:12px;color:var(--gray-600);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn-del{border:none;background:transparent;cursor:pointer;font-size:16px;padding:2px 4px;border-radius:6px;-webkit-tap-highlight-color:transparent;opacity:.7}
+.btn-del:active{opacity:1;background:var(--red-light)}
 .empty{text-align:center;padding:32px 16px;color:var(--gray-600);font-size:13px}
 .empty-icon{font-size:36px;margin-bottom:8px;opacity:.4}
 .toast{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom) + 12px);left:50%;transform:translateX(-50%) translateY(8px);background:#343a40;color:#fff;border-radius:var(--r-sm);padding:9px 20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px)}
@@ -268,14 +270,22 @@ function rRelatorio(){
   <div class="stats-grid"><div class="stat-card"><div class="stat-val" style="color:#1b5e20">${usP}</div><div class="stat-lbl">P utilizadas</div></div><div class="stat-card"><div class="stat-val" style="color:#6d4c00">${usM}</div><div class="stat-lbl">M utilizadas</div></div></div>
   <div class="stats-grid" style="margin-top:0"><div class="stat-card"><div class="stat-val" style="color:#7b1a2e">${usG}</div><div class="stat-lbl">G utilizadas</div></div><div class="stat-card"><div class="stat-val">${saldo.p+saldo.m+saldo.g}</div><div class="stat-lbl">Saldo restante</div></div></div>
   <div class="card"><div class="card-title">Por barraca</div>${Object.entries(pb).map(([n,v])=>`<div class="li"><div class="li-main"><div class="li-name">${n}</div><div class="li-sub">Saiu: <span class="badge bp">${v.sp}P</span> <span class="badge bm">${v.sm}M</span> <span class="badge bg">${v.sg}G</span></div></div><div style="text-align:right;font-size:12px;color:var(--gray-600)">Usou: ${v.sp-v.vp}P ${v.sm-v.vm}M ${v.sg-v.vg}G</div></div>`).join('')}</div>
-  <div class="card"><div class="card-title">Histórico (${movimentos.length})</div>${[...movimentos].reverse().map(mvHTML).join('')}</div>`
+  <div class="card"><div class="card-title">Histórico (${movimentos.length})</div>${[...movimentos].reverse().map(mv=>mvHTML(mv,true)).join('')}</div>`
 }
 
-function mvHTML(mv){
+function mvHTML(mv, showDel=false){
   const bar=barracas.find(b=>b.id===mv.barraca_id),n=bar?bar.nome:'?'
   const pts=[mv.qtd_p&&mv.qtd_p+'P',mv.qtd_m&&mv.qtd_m+'M',mv.qtd_g&&mv.qtd_g+'G'].filter(Boolean).join(' · ')
   const h=mv.created_at?new Date(mv.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
-  return`<div class="mitem"><div class="mtop"><span class="mname">${n}</span><span class="badge ${mv.tipo==='saida'?'bs':'br'}">${mv.tipo==='saida'?'↑ Saída':'↓ Retorno'}</span></div><div class="mdetail"><span>${pts}</span>${mv.retirado_por?`<span>— ${mv.retirado_por}</span>`:''}<span>· ${h}</span></div></div>`
+  const delBtn=showDel?`<button class="btn-del" data-del-mv="${mv.id}">🗑</button>`:''
+  return`<div class="mitem"><div class="mtop"><span class="mname">${n}</span><div style="display:flex;align-items:center;gap:6px"><span class="badge ${mv.tipo==='saida'?'bs':'br'}">${mv.tipo==='saida'?'↑ Saída':'↓ Retorno'}</span>${delBtn}</div></div><div class="mdetail"><span>${pts}</span>${mv.retirado_por?`<span>— ${mv.retirado_por}</span>`:''}<span>· ${h}</span></div></div>`
+}
+
+async function delMovimento(id){
+  if(!confirm('Excluir esta movimentação?')) return
+  const{error}=await db.from('movimentos').delete().eq('id',id)
+  if(error){toast('Erro ao excluir');return}
+  toast('Movimentação excluída!')
 }
 
 function empty(msg){return`<div class="empty"><div class="empty-icon">📦</div>${msg}</div>`}
@@ -302,6 +312,9 @@ function attachHandlers(t){
       const el=document.getElementById(`qv-${pfx}-${tam}`)
       if(el)el.textContent=obj[tam]
     })
+  })
+  document.querySelectorAll('[data-del-mv]').forEach(btn=>{
+    btn.addEventListener('click',()=>delMovimento(btn.dataset.delMv))
   })
   if(t==='barracas'){
     document.getElementById('btn-add-b').addEventListener('click',addBarraca)
