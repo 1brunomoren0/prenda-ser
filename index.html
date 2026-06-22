@@ -202,7 +202,7 @@ function exportPDF(){
   setTimeout(()=>w.print(),500)
 }
 
-boot(){
+async function boot(){
   document.getElementById('app').innerHTML=`
     <div class="shell">
       <header class="header">
