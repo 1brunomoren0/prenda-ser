@@ -183,6 +183,14 @@ function exportPDF(){
   </style></head><body>
   <h1>🎪 Relatório de Prendas — Festa Junina</h1>
   <div class="sub">Colégio SER · Gerado em ${dt}</div>
+  <h2>Estoque Inicial × Estoque Final</h2>
+  <table><thead><tr><th>Tamanho</th><th>Inicial</th><th>Utilizado</th><th>Saldo Final</th><th>Aproveitamento</th></tr></thead>
+  <tbody>
+    <tr><td>P — Pequena</td><td>${estoqueInicial.p}</td><td>${usP}</td><td>${saldo.p}</td><td>${estoqueInicial.p?Math.round((usP/estoqueInicial.p)*100):0}%</td></tr>
+    <tr><td>M — Média</td><td>${estoqueInicial.m}</td><td>${usM}</td><td>${saldo.m}</td><td>${estoqueInicial.m?Math.round((usM/estoqueInicial.m)*100):0}%</td></tr>
+    <tr><td>G — Grande</td><td>${estoqueInicial.g}</td><td>${usG}</td><td>${saldo.g}</td><td>${estoqueInicial.g?Math.round((usG/estoqueInicial.g)*100):0}%</td></tr>
+    <tr style="font-weight:700;background:#e8f1fb"><td>TOTAL</td><td>${estoqueInicial.p+estoqueInicial.m+estoqueInicial.g}</td><td>${usP+usM+usG}</td><td>${saldo.p+saldo.m+saldo.g}</td><td>${(estoqueInicial.p+estoqueInicial.m+estoqueInicial.g)?Math.round(((usP+usM+usG)/(estoqueInicial.p+estoqueInicial.m+estoqueInicial.g))*100):0}%</td></tr>
+  </tbody></table>
   <h2>Resumo Geral</h2>
   <div class="resumo">
     <div class="box"><div class="box-val" style="color:#1b5e20">${usP}</div><div class="box-lbl">P utilizadas</div></div>
@@ -353,13 +361,67 @@ function rRelatorio(){
   const usG=saidas.reduce((a,m)=>a+m.qtd_g,0)-rets.reduce((a,m)=>a+m.qtd_g,0)
   const pb={}
   movimentos.forEach(mv=>{const bar=barracas.find(b=>b.id===mv.barraca_id);const n=bar?bar.nome:'?';if(!pb[n])pb[n]={sp:0,sm:0,sg:0,vp:0,vm:0,vg:0};if(mv.tipo==='saida'){pb[n].sp+=mv.qtd_p;pb[n].sm+=mv.qtd_m;pb[n].sg+=mv.qtd_g}else{pb[n].vp+=mv.qtd_p;pb[n].vm+=mv.qtd_m;pb[n].vg+=mv.qtd_g}})
+  const pctP=estoqueInicial.p?Math.round((usP/estoqueInicial.p)*100):0
+  const pctM=estoqueInicial.m?Math.round((usM/estoqueInicial.m)*100):0
+  const pctG=estoqueInicial.g?Math.round((usG/estoqueInicial.g)*100):0
+  const totalIni=estoqueInicial.p+estoqueInicial.m+estoqueInicial.g
+  const totalUsado=usP+usM+usG
+  const totalSaldo=saldo.p+saldo.m+saldo.g
+  const pctTotal=totalIni?Math.round((totalUsado/totalIni)*100):0
+
   return`<p class="page-title">Relatório geral</p>
   <div style="display:flex;gap:8px;margin-bottom:12px">
     <button class="btn btn-outline" style="flex:1;font-size:13px" id="btn-csv">📄 Exportar CSV</button>
     <button class="btn btn-outline" style="flex:1;font-size:13px" id="btn-pdf">🖨️ Exportar PDF</button>
   </div>
+
+  <div class="card">
+    <div class="card-title">📊 Estoque inicial × Estoque final</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:#f1f3f5">
+          <th style="padding:7px 8px;text-align:left;font-weight:600;color:#6c757d;font-size:11px">TAMANHO</th>
+          <th style="padding:7px 8px;text-align:center;font-weight:600;color:#6c757d;font-size:11px">INICIAL</th>
+          <th style="padding:7px 8px;text-align:center;font-weight:600;color:#6c757d;font-size:11px">UTILIZADO</th>
+          <th style="padding:7px 8px;text-align:center;font-weight:600;color:#6c757d;font-size:11px">SALDO</th>
+          <th style="padding:7px 8px;text-align:center;font-weight:600;color:#6c757d;font-size:11px">%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-top:1px solid #e9ecef">
+          <td style="padding:8px"><span class="badge bp">P</span></td>
+          <td style="padding:8px;text-align:center;font-weight:600">${estoqueInicial.p}</td>
+          <td style="padding:8px;text-align:center;color:#c0392b;font-weight:600">${usP}</td>
+          <td style="padding:8px;text-align:center;color:#2d8a4e;font-weight:600">${saldo.p}</td>
+          <td style="padding:8px;text-align:center"><span style="background:#e8f1fb;color:#1a5fa8;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600">${pctP}%</span></td>
+        </tr>
+        <tr style="border-top:1px solid #e9ecef;background:#f8f9fa">
+          <td style="padding:8px"><span class="badge bm">M</span></td>
+          <td style="padding:8px;text-align:center;font-weight:600">${estoqueInicial.m}</td>
+          <td style="padding:8px;text-align:center;color:#c0392b;font-weight:600">${usM}</td>
+          <td style="padding:8px;text-align:center;color:#2d8a4e;font-weight:600">${saldo.m}</td>
+          <td style="padding:8px;text-align:center"><span style="background:#e8f1fb;color:#1a5fa8;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600">${pctM}%</span></td>
+        </tr>
+        <tr style="border-top:1px solid #e9ecef">
+          <td style="padding:8px"><span class="badge bg">G</span></td>
+          <td style="padding:8px;text-align:center;font-weight:600">${estoqueInicial.g}</td>
+          <td style="padding:8px;text-align:center;color:#c0392b;font-weight:600">${usG}</td>
+          <td style="padding:8px;text-align:center;color:#2d8a4e;font-weight:600">${saldo.g}</td>
+          <td style="padding:8px;text-align:center"><span style="background:#e8f1fb;color:#1a5fa8;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600">${pctG}%</span></td>
+        </tr>
+        <tr style="border-top:2px solid #dee2e6;background:#f1f3f5">
+          <td style="padding:8px;font-weight:700;font-size:12px">TOTAL</td>
+          <td style="padding:8px;text-align:center;font-weight:700">${totalIni}</td>
+          <td style="padding:8px;text-align:center;color:#c0392b;font-weight:700">${totalUsado}</td>
+          <td style="padding:8px;text-align:center;color:#2d8a4e;font-weight:700">${totalSaldo}</td>
+          <td style="padding:8px;text-align:center"><span style="background:#1a5fa8;color:#fff;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:700">${pctTotal}%</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="stats-grid"><div class="stat-card"><div class="stat-val" style="color:#1b5e20">${usP}</div><div class="stat-lbl">P utilizadas</div></div><div class="stat-card"><div class="stat-val" style="color:#6d4c00">${usM}</div><div class="stat-lbl">M utilizadas</div></div></div>
-  <div class="stats-grid" style="margin-top:0"><div class="stat-card"><div class="stat-val" style="color:#7b1a2e">${usG}</div><div class="stat-lbl">G utilizadas</div></div><div class="stat-card"><div class="stat-val">${saldo.p+saldo.m+saldo.g}</div><div class="stat-lbl">Saldo restante</div></div></div>
+  <div class="stats-grid" style="margin-top:0"><div class="stat-card"><div class="stat-val" style="color:#7b1a2e">${usG}</div><div class="stat-lbl">G utilizadas</div></div><div class="stat-card"><div class="stat-val">${totalSaldo}</div><div class="stat-lbl">Saldo restante</div></div></div>
   <div class="card"><div class="card-title">Por barraca</div>${Object.entries(pb).map(([n,v])=>`<div class="li"><div class="li-main"><div class="li-name">${n}</div><div class="li-sub">Saiu: <span class="badge bp">${v.sp}P</span> <span class="badge bm">${v.sm}M</span> <span class="badge bg">${v.sg}G</span></div></div><div style="text-align:right;font-size:12px;color:var(--gray-600)">Usou: ${v.sp-v.vp}P ${v.sm-v.vm}M ${v.sg-v.vg}G</div></div>`).join('')}</div>
   <div class="card"><div class="card-title">Histórico (${movimentos.length})</div>${[...movimentos].reverse().map(mv=>mvHTML(mv,true)).join('')}</div>`
 }
